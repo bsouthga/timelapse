@@ -1,24 +1,23 @@
-#
-# create timelapse video from images
-#
+#!/usr/bin/env bash
 
+#
+# reshape photos to 4k frames and add timestamp
+#
 shrink_image() {
   local filename=$1
-  convert ./$filename \
-    -resize '3840x2160^' \
-    -gravity center \
-    -crop '3840x2160+0+0' \
-    ../4k/$filename
 
- convert "../4k/$filename" \
-  -gravity SouthEast \
-  -pointsize 22 \
-  -fill white \
-  -annotate +30+30  %[exif:DateTimeOriginal] \
-  "../4k/date_$filename";
+  convert ./raw/$filename \
+    -resize '3840x2160^' \
+    -gravity NorthEast \
+    -crop '3840x2160+0+0' \
+    -pointsize 72 \
+    -fill white \
+    -undercolor '#00000080' \
+    -annotate +30+30  %[exif:DateTimeOriginal] \
+    ./4k/$filename
 }
+export -f shrink_image
 
 echo "resizing files..."
 mkdir -p ./4k
-cd ./raw
-ls *.JPG | parallel --eta shrink_image {1}
+ls -A1 ./raw | parallel --eta shrink_image {1}
